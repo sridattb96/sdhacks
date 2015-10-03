@@ -6,7 +6,16 @@ var express = require('express')
   , bodyParser = require('body-parser')
   , morgan = require('morgan')
   , methodOverride = require('method-override')
-  , SliceStrategy = require('passport-slice').Strategy;
+  , SliceStrategy = require('passport-slice').Strategy
+  , mongoose = require('mongoose');
+
+
+
+var url = 'mongodb://localhost/sdhacks';
+var db = mongoose.createConnection(url);
+
+require('./models/user');
+
 
 var SLICE_CLIENT_ID = "8ee96e75"
 var SLICE_CLIENT_SECRET = "5382c68434f72e0a62702e1df2a093f5";
