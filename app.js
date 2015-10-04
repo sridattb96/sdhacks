@@ -290,6 +290,12 @@ app.get('/refresh', function(req, res) {
                         else if (mostExpPrice && mostExpPrice < order.orderTotal) {
                           var diff = order.orderTotal - mostExpPrice;
                           message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + diff; 
+                          
+                          var d = new Date();
+                          Notification.create({
+                            message: message,
+                            time: d
+                          })
                           //push message to notifications collection
 
                           User.update({}, {
@@ -314,7 +320,14 @@ app.get('/refresh', function(req, res) {
                           if (words[i] === "Structures") {
                             message = "You nerd!"
                           }
+
                         }
+
+                        var d = new Date();
+                        Notification.create({
+                          message: message,
+                          time: d
+                        })
                         
                         console.log(message);
 
