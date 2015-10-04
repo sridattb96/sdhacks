@@ -3,12 +3,13 @@ var Schema = mongoose.Schema;
 
 var itemSchema = new Schema({
 	name: String,
+	merchant: String,
 	category: String,
 	price: Number,
-	Time: Date
+	time: Date
 	
 }, { 
 	minimize: false
 });
 
-var item = mongoose.model('item', itemSchema);
+var Item = mongoose.model('Item', itemSchema);

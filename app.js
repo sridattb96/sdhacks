@@ -15,6 +15,22 @@ var db = mongoose.createConnection(url);
 var orders; 
 var auth;
 
+function makeRequest(url, result) {
+  request({
+      url: url, 
+      method: 'GET', 
+      headers: { //We can define headers too
+          'Authorization' : auth
+      }
+  }, function(error, response, body){
+      if(error) {
+          console.log(error);
+      } else {
+          result = body; 
+      }
+  });
+}
+
 require('./models/item');
 require('./models/notification');
 
@@ -65,6 +81,7 @@ passport.use(new SliceStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
     auth = "Bearer " + accessToken; 
+    // console.log(auth);
     process.nextTick(function () {
       request({
           url: 'https://api.slice.com/api/v1/orders', //URL to hit
@@ -105,6 +122,48 @@ app.get('/orders', function(req, res) {
   }
   var j = JSON.parse(orders);
   res.json(j);
+})
+
+app.get('/refresh', function(req, res) {
+  var curr;
+  if (process.env.LAST_UPDATE) {
+    curr = new Date(process.env.LAST_UPDATE);
+  }
+  else {
+    curr = new Date(1995, 11, 11);
+  }
+  for (var order in orders) {
+
+    if (Date(order.Date) > curr) {
+      console.log('yes!');
+      var merchant; 
+      var item;
+      makeRequest(order.merchant.href, merchant)
+      makeRequest(order.items[0].href, item);
+      var d = new Date(order.orderDate);
+
+      Item.create({
+        name : item.result.description, 
+        merchant : merchant.result.name,
+        category : item.result.category.name,
+        price : order.orderTotal,
+        time : d
+      }, function(err, item) {
+        console.log(item);
+
+
+      });
+
+      Item.find(function(err, items) {
+        if (err) {
+          res.send(err);
+        }
+        res.json(items);
+      })
+    }
+  }
+
+  
 })
 
 
