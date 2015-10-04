@@ -7,8 +7,23 @@ var express = require('express')
   , morgan = require('morgan')
   , methodOverride = require('method-override')
   , SliceStrategy = require('passport-slice').Strategy
-  , mongoose = require('mongoose');
+  , mongoose = require('mongoose')
+  , request = require('request');
 
+request({
+    url: 'https://api.slice.com/api/v1/orders', //URL to hit
+    // qs: {from: 'blog example', time: +new Date()}, //Query string data
+    method: 'GET', //Specify the method
+    headers: { //We can define headers too
+        'Authorization' : 'Bearer ebbd15b87763c2e648e4eaf948f3ea32'
+    }
+}, function(error, response, body){
+    if(error) {
+        console.log(error);
+    } else {
+        console.log(response.statusCode, body);
+    }
+});
 
 
 var url = 'mongodb://localhost/sdhacks';
@@ -63,6 +78,7 @@ passport.use(new SliceStrategy({
     callbackURL: "http://localhost:3000/auth/slice/callback"
   },
   function(accessToken, refreshToken, profile, done) {
+    console.log(accessToken);
     // asynchronous verification, for effect...
     process.nextTick(function () {
       
@@ -87,6 +103,8 @@ app.get('/account', ensureAuthenticated, function(req, res){
 app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
+
+
 
 // GET /auth/slice
 //   Use passport.authenticate() as route middleware to authenticate the
