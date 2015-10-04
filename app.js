@@ -238,7 +238,7 @@ app.get('/refresh', function(req, res) {
   //   }
   // })
 
-  temp.forEach(function(order) {
+  temp.forEach(function(order, ind) {
     var dt = moment().format(order.orderDate, 'YYYY-MM-DD');
 
     if (dt > curr) {
@@ -333,7 +333,13 @@ app.get('/refresh', function(req, res) {
                           num.electronics = body.length
                         })
 
-                        var arr = [num.books, num.toys, num.electronics]
+                        Item.find({
+                          category: "Travel"
+                        }, function(err, body) {
+                          num.travel = body.length
+                        })
+
+                        var arr = [num.books, num.toys, num.electronics, num.travel]
 
                         var i = arr.indexOf(Math.max.apply(Math, arr));
 
@@ -353,11 +359,26 @@ app.get('/refresh', function(req, res) {
                           cat = "electronics"
                         }
 
-                        var d = new Date()
-                        Notification.create({
-                          message: "There are the most " + cat + "out of all the categories",
-                          time: d
-                        })
+                        if (i == 4) {
+                          cat = "travel"
+                        }
+
+                        // var d = new Date()
+                        // Notification.create({
+                        //   message: "There are the most " + cat + "out of all the categories",
+                        //   time: d
+                        // })
+
+                        if (ind == order.length ) {
+                          var d = new Date();
+
+                          Notification.create({
+                            message: "There are the most " + cat + "out of all the categories",,
+                            time: d
+                          })
+                        }
+                        
+                        console.log(message);
 
 
                         //ALGORITHM - KEYWORDS
@@ -376,13 +397,17 @@ app.get('/refresh', function(req, res) {
 
                         }
 
-                        var d = new Date();
-                        Notification.create({
-                          message: message,
-                          time: d
-                        })
+                        if (ind == order.length ) {
+                          var d = new Date();
+
+                          Notification.create({
+                            message: "You nerd! What's up with the " + name + "you bought?",
+                            time: d
+                          })
+                        }
+
+
                         
-                        console.log(message);
 
                         //----------------------------------
 
