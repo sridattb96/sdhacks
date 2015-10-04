@@ -26,6 +26,14 @@ var orders;
 var auth;
 
 var myUserId; 
+var num = {
+  books: null,
+  toys: null,
+  electronics: null,
+  payments: null,
+  music: null,
+  travel: null
+}
 
 require('./models/item');
 require('./models/notification');
@@ -307,29 +315,57 @@ app.get('/refresh', function(req, res) {
                         }
                         //----------------------------------
 
+                        Item.find({
+                          category: "Books"
+                        }, function(err, body) {
+                          num.books = body.length
+                        })
+
+                        Item.find({
+                          category: "Toys & Games"
+                        }, function(err, body) {
+                          num.toys = body.length
+                        })
+
+                        Item.find({
+                          category: "Electronics & Accessories"
+                        }, function(err, body) {
+                          num.electronics = body.length
+                        })
+
+                        var arr = [num.books, num.toys, num.electronics]
+
+                        var i = arr.indexOf(Math.max.apply(Math, arr));
+
+                        console.log(i)
+                        console.log(arr[i])
+
+
                         //ALGORITHM - KEYWORDS
 
-                        var words = name.split(" ");
-                        console.log(words);
+                        // var words = name.split(" ");
+                        // console.log(words);
 
-                        for(var i = 0; i < words.length; i++ ){
-                          if (words[i] === "sex") {
-                            message = "You pervert!"
-                          }
+                        // for(var i = 0; i < words.length; i++ ){
+                        //   if (words[i] === "sex") {
+                        //     message = "You pervert!"
+                        //   }
 
-                          if (words[i] === "Structures") {
-                            message = "You nerd!"
-                          }
+                        //   if (words[i] === "Structures") {
+                        //     message = "You nerd!"
+                        //   }
 
-                        }
+                        // }
 
-                        var d = new Date();
-                        Notification.create({
-                          message: message,
-                          time: d
-                        })
+                        // var d = new Date();
+                        // Notification.create({
+                        //   message: message,
+                        //   time: d
+                        // })
                         
-                        console.log(message);
+                        // console.log(message);
+
+                        //----------------------------------
 
                         //ALGORITHM - INCONSISTENCY IN BUYING
 
