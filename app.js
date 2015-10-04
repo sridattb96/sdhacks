@@ -297,7 +297,7 @@ app.get('/refresh', function(req, res) {
 
                         else if (mostExpPrice && mostExpPrice < order.orderTotal) {
                           var diff = order.orderTotal - mostExpPrice;
-                          message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + diff; 
+                          message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + parseInt(diff)/100; 
                           
                           var d = new Date();
                           Notification.create({
@@ -369,7 +369,7 @@ app.get('/refresh', function(req, res) {
                         //   time: d
                         // })
 
-                        if (ind == order.length - 1 ) {
+                        if (ind == temp.length - 1 ) {
                           var d = new Date();
 
                           Notification.create({
