@@ -16,11 +16,16 @@ var db = mongoose.connect(url);
 var orders; 
 var auth;
 
+var myUserId; 
+
 require('./models/item');
 require('./models/notification');
+require('./models/user');
+
 
 var Item = mongoose.model('Item'),
     Notification = mongoose.model('Notification');
+    User = mongoose.model('User');
 
 // function makeRequest(url, result) {
 //   request({
@@ -101,6 +106,18 @@ passport.use(new SliceStrategy({
             console.log(error);
           } else {
             orders = JSON.parse(body); 
+
+            User.count(function (err, count) {
+                if (!err && count === 0) {
+                  User.create({
+                    mostExpName: null,
+                    mostExpPrice: null
+                  }, function(err, obj){
+                    //console.log(obj);
+                    myUserId = obj._id;
+                  })
+                }
+            });
           }
       });
       
@@ -159,6 +176,9 @@ app.get('/orders', function(req, res) {
 })
 
 app.get('/refresh', function(req, res) {
+
+  var message = "Refreshed!"
+
   var curr;
   curr = moment().format('1995-11-11', 'YYYY-MM-DD');
   // if (process.env.LAST_UPDATE) {
@@ -168,6 +188,14 @@ app.get('/refresh', function(req, res) {
   //   curr = new Date(1995, 11, 11);
   // }
   var temp = orders.result;
+  var userDefaults;
+
+  // User.find({}, function(err, data){
+  //   if (data) {
+  //     userDefaults = data[0];
+  //   }
+  // })
+
   temp.forEach(function(order) {
 
     // if (moment().format(order.orderDate, 'YYYY-MM-DD') > curr) {
@@ -213,7 +241,39 @@ app.get('/refresh', function(req, res) {
 
                   });
 
-                  
+                  //ALGORITHM - FIND MOST EXPENSIVE
+                  User.find({}, function(err, obj){
+
+                      var mostExpName = obj[0].mostExpName;
+                      var mostExpPrice = obj[0].mostExpPrice;
+
+                      if (mostExpName == null) {
+                        User.update({}, {
+                          mostExpName: name,
+                          mostExpPrice: order.orderTotal
+                        }, function(err, obj){
+                        })
+                      }
+
+                      console.log("compare: ");
+                      console.log(mostExpPrice);
+                      console.log(order.orderTotal);
+
+                      if (mostExpPrice && mostExpPrice < order.orderTotal) {
+                        var diff = order.orderTotal - mostExpPrice;
+                        message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + diff; 
+
+                        User.update({}, {
+                          mostExpName: name,
+                          mostExpPrice: order.orderTotal
+                        }, function(err, obj){
+
+                        })
+
+                      }
+                  })
+
+                                    
                 }
             });
           }
@@ -272,6 +332,7 @@ app.get('/refresh', function(req, res) {
 
   
   })
+  
 });
 
 
