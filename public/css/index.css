@@ -1,3 +1,53 @@
 * {
-	/*color: red;*/
+	box-sizing: border-box;
+}
+
+html{
+  min-height:100%;/* make sure it is at least as tall as the viewport */
+  position:relative;
+}
+body{
+  height:100%; /* force the BODY element to match the height of the HTML element */
+}
+
+.bg {
+	margin: 20px;
+	position: absolute;
+	z-index: 1;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+
+	background: url(https://images.unsplash.com/photo-1420547625303-0894752c1ffa?q=80&fm=jpg&s=2f20098d5520afdf44a138015ecd55c2);
+	background-size: 120%;
+}
+
+.inner {
+	font-family: 'Lato', sans-serif;
+	z-index: 2;
+	position: relative;
+	margin: 240px auto;
+	display: block;
+	text-align: center;
+	width: 300px;
+	height: 150px;
+	padding: 20px;
+	
+	background-color: whitesmoke;
+}
+
+.inner h1 {
+	font-weight: 700;
+	font-size: 3em;
+	margin-bottom: 40px;
+}
+
+.inner .login {
+	text-decoration: none;
+	/*color: #1C3D44;*/
+	color: whitesmoke;
+	padding: 5px 7px;
+	background-color: black;
+	/*background-color: #A9D3E3;*/
 }

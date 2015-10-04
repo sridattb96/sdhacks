@@ -97,10 +97,6 @@ app.get('/account', ensureAuthenticated, function(req, res){
   res.render('account', { user: req.user });
 });
 
-app.get('/login', function(req, res){
-  res.render('login', { user: req.user });
-});
-
 app.get('/orders', function(req, res) {
   if (!req.user) {
     res.render('index');
@@ -131,7 +127,7 @@ app.get('/auth/slice',
 app.get('/auth/slice/callback', 
   passport.authenticate('slice', { failureRedirect: '/login' }),
   function(req, res) {
-    res.redirect('/');
+    res.redirect('/account');
   });
 
 app.get('/logout', function(req, res){
