@@ -101,12 +101,33 @@ app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
 
-app.get('/orders', function(req, res) {
+app.post('/orders', function(req, res) {
   if (!req.user) {
     res.render('index');
   }
   var j = JSON.parse(orders);
-  res.json(j);
+  //res.json(j);
+
+  //processing this json for all the conditions
+  //console.log(j)
+  var data = j.result;
+  var overSpent = [];
+  var message = null
+
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].orderTotal > 1000) {
+      overSpent.push(data[i].orderNumber);
+    }
+  }
+
+  if (overSpent.length > 0) {
+    message = "Do you really gotta spend that much bruh? Here were your orders over 1000:"
+  }
+
+  var obj = { mess: message, orderNums: overSpent }
+
+  res.json(obj)
+
 })
 
 
