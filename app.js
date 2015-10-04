@@ -162,7 +162,7 @@ app.get('/refresh', function(req, res) {
   var temp = orders.result;
   temp.forEach(function(order) {
 
-    if (moment().format(order.orderDate, 'YYYY-MM-DD') > curr) {
+    // if (moment().format(order.orderDate, 'YYYY-MM-DD') > curr) {
       
       var merchant;
       var name;
@@ -233,7 +233,7 @@ app.get('/refresh', function(req, res) {
 
 
       // });
-    }
+    // }
 
       
 
