@@ -10,6 +10,7 @@
     "http": "0.0.0",
     "https": "^1.0.0",
     "method-override": "^2.3.0",
+    "moment": "^2.10.6",
     "morgan": "^1.5.0",
     "passport": ">= 0.0.0",
     "passport-slice": ">= 0.0.0"

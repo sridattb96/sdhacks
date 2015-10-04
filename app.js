@@ -8,12 +8,19 @@ var express = require('express')
   , methodOverride = require('method-override')
   , SliceStrategy = require('passport-slice').Strategy
   , mongoose = require('mongoose')
-  , request = require('request');
+  , request = require('request')
+  , moment = require('moment');
 
 var url = 'mongodb://localhost/sdhacks';
-var db = mongoose.createConnection(url);
+var db = mongoose.connect(url);
 var orders; 
 var auth;
+
+require('./models/item');
+require('./models/notification');
+
+var Item = mongoose.model('Item'),
+    Notification = mongoose.model('Notification');
 
 function makeRequest(url, result) {
   request({
@@ -31,8 +38,7 @@ function makeRequest(url, result) {
   });
 }
 
-require('./models/item');
-require('./models/notification');
+
 
 var SLICE_CLIENT_ID = "8ee96e75"
 var SLICE_CLIENT_SECRET = "5382c68434f72e0a62702e1df2a093f5";
@@ -92,9 +98,9 @@ passport.use(new SliceStrategy({
           }
       }, function(error, response, body){
           if(error) {
-              console.log(error);
+            console.log(error);
           } else {
-              orders = body; 
+            orders = JSON.parse(body); 
           }
       });
       
@@ -120,51 +126,77 @@ app.get('/orders', function(req, res) {
   if (!req.user) {
     res.render('index');
   }
-  var j = JSON.parse(orders);
-  res.json(j);
+
+  res.json(orders);
 })
 
 app.get('/refresh', function(req, res) {
   var curr;
-  if (process.env.LAST_UPDATE) {
-    curr = new Date(process.env.LAST_UPDATE);
-  }
-  else {
-    curr = new Date(1995, 11, 11);
-  }
-  for (var order in orders) {
+  curr = moment().format('1995-11-11', 'YYYY-MM-DD');
+  // if (process.env.LAST_UPDATE) {
+  //   curr = new Date(process.env.LAST_UPDATE);
+  // }
+  // else {
+  //   curr = new Date(1995, 11, 11);
+  // }
+  var temp = orders.result;
+  temp.forEach(function(order) {
 
-    if (Date(order.Date) > curr) {
-      console.log('yes!');
-      var merchant; 
-      var item;
-      makeRequest(order.merchant.href, merchant)
-      makeRequest(order.items[0].href, item);
-      var d = new Date(order.orderDate);
+    if (moment().format(order.orderDate, 'YYYY-MM-DD') > curr) {
+      // var merchant; 
+      // var item;
+      // makeRequest(order.merchant.href, merchant)
+      // makeRequest(order.items[0].href, item);
+
+      // console.log(merchant);
+
+
+
+      // var d = new Date(order.orderDate);
 
       Item.create({
-        name : item.result.description, 
-        merchant : merchant.result.name,
-        category : item.result.category.name,
-        price : order.orderTotal,
-        time : d
+        name : "blah", 
+        merchant : "blah",
+        category : "blah",
+        price : 123,
+        time : new Date()
       }, function(err, item) {
-        console.log(item);
+        console.log('yes');
 
 
       });
-
-      Item.find(function(err, items) {
-        if (err) {
-          res.send(err);
-        }
-        res.json(items);
-      })
     }
-  }
+
+      
+
+    //   // Item.create({
+    //   //   name : item.result.description, 
+    //   //   merchant : merchant.result.name,
+    //   //   category : item.result.category.name,
+    //   //   price : order.orderTotal,
+    //   //   time : d
+    //   // }, function(err, item) {
+    //   //   console.log(item);
+
+
+    //   // });
+    // }
+    
+
+
+
+    // Item.find(function(err, items) {
+    //   if (err) {
+    //     res.send(err);
+    //   }
+    //   res.json(items);
+    // })
+    
+
 
   
-})
+  })
+});
 
 
 
