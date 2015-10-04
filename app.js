@@ -340,6 +340,25 @@ app.get('/refresh', function(req, res) {
                         console.log(i)
                         console.log(arr[i])
 
+                        var cat = "travel"
+                        if (i==0){
+                          cat = "books"
+                        }
+
+                        if (i == 1){
+                          cat = "toys"
+                        }
+
+                        if (i == 2) {
+                          cat = "electronics"
+                        }
+
+                        var d = new Date()
+                        Notification.create({
+                          message: "There are the most " + cat + "out of all the categories",
+                          time: d
+                        })
+
 
                         //ALGORITHM - KEYWORDS
 
