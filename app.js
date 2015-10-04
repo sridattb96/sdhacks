@@ -11,7 +11,16 @@ var express = require('express')
   , request = require('request')
   , moment = require('moment');
 
-var url = 'mongodb://localhost/sdhacks';
+var url; 
+var cb;
+if (process.env.NODE_ENV === 'development') {
+  url = 'mongodb://localhost/sdhacks';
+  cb = 'http://localhost:3000/auth/slice/callback';
+} else if (process.env.NODE_ENV === 'production') {
+  url = process.env.MONGOLAB_URI;
+  cb = '/auth/slice/callback';
+}
+
 var db = mongoose.connect(url);
 var orders; 
 var auth;
@@ -21,24 +30,6 @@ require('./models/notification');
 
 var Item = mongoose.model('Item'),
     Notification = mongoose.model('Notification');
-
-// function makeRequest(url, result) {
-//   request({
-//       url: url, 
-//       method: 'GET', 
-//       headers: { //We can define headers too
-//           'Authorization' : auth
-//       }
-//   }, function(error, response, body){
-//       if(error) {
-//           console.log(error);
-//       } else {
-//           result = body; 
-//       }
-//   });
-// }
-
-
 
 var SLICE_CLIENT_ID = "8ee96e75"
 var SLICE_CLIENT_SECRET = "5382c68434f72e0a62702e1df2a093f5";
@@ -83,10 +74,11 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SliceStrategy({
     clientID: SLICE_CLIENT_ID,
     clientSecret: SLICE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/slice/callback"
+    callbackURL: cb
   },
   function(accessToken, refreshToken, profile, done) {
     auth = "Bearer " + accessToken; 
+    console.log("AUTHORIZATION = " + auth);
     // console.log(auth);
     process.nextTick(function () {
       request({
@@ -304,7 +296,9 @@ app.get('/logout', function(req, res){
   res.redirect('/');
 });
 
-app.listen(3000);
+app.set('port', (process.env.PORT || 3000));
+
+app.listen(app.get('port'));
 
 
 // Simple route middleware to ensure user is authenticated.
