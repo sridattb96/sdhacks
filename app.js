@@ -343,27 +343,27 @@ app.get('/refresh', function(req, res) {
 
                         //ALGORITHM - KEYWORDS
 
-                        // var words = name.split(" ");
-                        // console.log(words);
+                        var words = name.split(" ");
+                        console.log(words);
 
-                        // for(var i = 0; i < words.length; i++ ){
-                        //   if (words[i] === "sex") {
-                        //     message = "You pervert!"
-                        //   }
+                        for(var i = 0; i < words.length; i++ ){
+                          if (words[i] === "sex") {
+                            message = "You pervert!"
+                          }
 
-                        //   if (words[i] === "Structures") {
-                        //     message = "You nerd!"
-                        //   }
+                          if (words[i] === "Structures") {
+                            message = "You nerd!"
+                          }
 
-                        // }
+                        }
 
-                        // var d = new Date();
-                        // Notification.create({
-                        //   message: message,
-                        //   time: d
-                        // })
+                        var d = new Date();
+                        Notification.create({
+                          message: message,
+                          time: d
+                        })
                         
-                        // console.log(message);
+                        console.log(message);
 
                         //----------------------------------
 
