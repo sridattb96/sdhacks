@@ -11,7 +11,16 @@ var express = require('express')
   , request = require('request')
   , moment = require('moment');
 
-var url = 'mongodb://localhost/sdhacks';
+var url; 
+var cb;
+if (process.env.NODE_ENV === 'development') {
+  url = 'mongodb://localhost/sdhacks';
+  cb = 'http://localhost:3000/auth/slice/callback';
+} else if (process.env.NODE_ENV === 'production') {
+  url = process.env.MONGOLAB_URI;
+  cb = 'http://sdhacks2015.herokuapp.com/auth/slice/callback';
+}
+
 var db = mongoose.connect(url);
 var orders; 
 var auth;
@@ -26,24 +35,6 @@ require('./models/user');
 var Item = mongoose.model('Item'),
     Notification = mongoose.model('Notification');
     User = mongoose.model('User');
-
-// function makeRequest(url, result) {
-//   request({
-//       url: url, 
-//       method: 'GET', 
-//       headers: { //We can define headers too
-//           'Authorization' : auth
-//       }
-//   }, function(error, response, body){
-//       if(error) {
-//           console.log(error);
-//       } else {
-//           result = body; 
-//       }
-//   });
-// }
-
-
 
 var SLICE_CLIENT_ID = "8ee96e75"
 var SLICE_CLIENT_SECRET = "5382c68434f72e0a62702e1df2a093f5";
@@ -88,10 +79,11 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new SliceStrategy({
     clientID: SLICE_CLIENT_ID,
     clientSecret: SLICE_CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/slice/callback"
+    callbackURL: cb
   },
   function(accessToken, refreshToken, profile, done) {
     auth = "Bearer " + accessToken; 
+    console.log("AUTHORIZATION = " + auth);
     // console.log(auth);
     process.nextTick(function () {
       request({
@@ -144,10 +136,17 @@ app.get('/login', function(req, res){
 });
 
 app.get('/orders', function(req, res) {
+  Item.find({}, function(err, items) {
+    res.json(items);
+  })
+  // var j = JSON.parse('{"currentTime":1443945578000,"result":[{"updateTime":1443900446000,"orderNumber":"WWRG-714577","orderTitle":"","orderDate":"2015-09-30","orderTax":0,"shippingCost":800,"orderTotal":2950,"purchaseType":{"name":"Shippable Purchase","href":"https://api.slice.com/api/v1/purchasetypes/2"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/104913"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/8825320504685508561"}],"shipments":[],"orderEmails":[{"href":"https://api.slice.com/api/v1/emails/-2744358439782971816"}],"shipmentEmails":[],"attributes":[],"href":"https://api.slice.com/api/v1/orders/-5423354854282239345"},{"updateTime":1443900459000,"orderNumber":"20-47486/NCA","orderTitle":"","orderDate":"2015-07-18","orderTax":0,"shippingCost":0,"orderTotal":0,"purchaseType":{"name":"Shippable Purchase","href":"https://api.slice.com/api/v1/purchasetypes/2"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/13"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/-1286170951846858922"}],"shipments":[{"href":"https://api.slice.com/api/v1/shipments/2917934367052764465"}],"orderEmails":[{"href":"https://api.slice.com/api/v1/emails/-549732122993425930"}],"shipmentEmails":[{"href":"https://api.slice.com/api/v1/emails/-3115291614562854745"}],"attributes":[],"href":"https://api.slice.com/api/v1/orders/6214947023161511848"},{"updateTime":1443900454000,"orderNumber":"111-8979626-3093814","orderTitle":"","orderDate":"2014-10-31","orderTax":0,"shippingCost":0,"orderTotal":0,"purchaseType":{"name":"Shippable Purchase","href":"https://api.slice.com/api/v1/purchasetypes/2"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/1"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/807488140574327793"},{"href":"https://api.slice.com/api/v1/items/-1611323039806152719"}],"shipments":[{"href":"https://api.slice.com/api/v1/shipments/8468805107214919429"}],"orderEmails":[],"shipmentEmails":[{"href":"https://api.slice.com/api/v1/emails/5947302459353644415"}],"attributes":[],"href":"https://api.slice.com/api/v1/orders/971490600264586275"},{"updateTime":1443900461000,"orderNumber":"1664-2811-8719-2159","orderTitle":"","orderDate":"2013-03-20","orderTax":0,"shippingCost":0,"orderTotal":100,"purchaseType":{"name":"Payment","href":"https://api.slice.com/api/v1/purchasetypes/3"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/58"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/-164636839841946475"}],"shipments":[],"orderEmails":[{"href":"https://api.slice.com/api/v1/emails/7166300581912913232"}],"shipmentEmails":[],"attributes":[],"href":"https://api.slice.com/api/v1/orders/7380408207138564003"}]}');
+  // res.json(j)
+})
+
+app.get('/slice', function(req, res) {
   if (!req.user) {
     res.render('index');
   }
-
 
   res.json(orders);
 
@@ -181,12 +180,12 @@ app.get('/refresh', function(req, res) {
 
   var curr;
   curr = moment().format('1995-11-11', 'YYYY-MM-DD');
-  // if (process.env.LAST_UPDATE) {
-  //   curr = new Date(process.env.LAST_UPDATE);
-  // }
-  // else {
-  //   curr = new Date(1995, 11, 11);
-  // }
+  if (process.env.LAST_UPDATE != null) {
+    curr = moment().format(process.env.LAST_UPDATE, 'YYYY-MM-DD');
+  }
+  else {
+    curr = moment().format('1995-11-11', 'YYYY-MM-DD');
+  }
   var temp = orders.result;
   var userDefaults;
 
@@ -197,8 +196,9 @@ app.get('/refresh', function(req, res) {
   // })
 
   temp.forEach(function(order) {
+    var dt = moment().format(order.orderDate, 'YYYY-MM-DD');
 
-    // if (moment().format(order.orderDate, 'YYYY-MM-DD') > curr) {
+    if (dt > curr) {
       
       var merchant;
       var name;
@@ -235,7 +235,7 @@ app.get('/refresh', function(req, res) {
                     merchant : merchant,
                     category : category,
                     price : order.orderTotal,
-                    time : new Date()
+                    time : order.orderDate
                   }, function(err, item) {
 
 
@@ -277,62 +277,14 @@ app.get('/refresh', function(req, res) {
                 }
             });
           }
-      });
-      
-      // var merchant; 
-      // var item;
-      // makeRequest(order.merchant.href, merchant)fvc
-      // makeRequest(order.items[0].href, item);
+      });}
+  });
 
-      // console.log(merchant);
-
-
-
-      // var d = new Date(order.orderDate);
-
-      // Item.create({
-      //   name : "blah", 
-      //   merchant : "blah",
-      //   category : "blah",
-      //   price : 123,
-      //   time : new Date()
-      // }, function(err, item) {
-      //   console.log('yes');
-
-
-      // });
-    // }
-
-      
-
-    //   // Item.create({
-    //   //   name : item.result.description, 
-    //   //   merchant : merchant.result.name,
-    //   //   category : item.result.category.name,
-    //   //   price : order.orderTotal,
-    //   //   time : d
-    //   // }, function(err, item) {
-    //   //   console.log(item);
-
-
-    //   // });
-    // }
-    
-
-
-
-    // Item.find(function(err, items) {
-    //   if (err) {
-    //     res.send(err);
-    //   }
-    //   res.json(items);
-    // })
-    
-
-
-  
+  Item.findOne({}).sort('-time').exec(function(err, max) {
+    process.env['LAST_UPDATE'] = max;
   })
   
+  res.redirect('/orders');
 });
 
 
@@ -365,7 +317,9 @@ app.get('/logout', function(req, res){
   res.redirect('/');
 });
 
-app.listen(3000);
+app.set('port', (process.env.PORT || 3000));
+
+app.listen(app.get('port'));
 
 
 // Simple route middleware to ensure user is authenticated.
@@ -375,5 +329,5 @@ app.listen(3000);
 //   login page.
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+  res.redirect('/')
 }

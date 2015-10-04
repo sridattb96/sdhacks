@@ -6,7 +6,7 @@ var ItemSchema = new Schema({
 	merchant: String,
 	category: String,
 	price: Number,
-	time: Date
+	time: String
 	
 });
 
