@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === 'development') {
   cb = 'http://localhost:3000/auth/slice/callback';
 } else if (process.env.NODE_ENV === 'production') {
   url = process.env.MONGOLAB_URI;
-  cb = '/auth/slice/callback';
+  cb = 'http://sdhacks2015.herokuapp.com/auth/slice/callback';
 }
 
 var db = mongoose.connect(url);
