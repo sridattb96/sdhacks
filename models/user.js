@@ -6,27 +6,33 @@ var UserSchema = new Schema({
 	mostExpPrice: Number,
 	books: {
 		avgTime: Number,
-		lastPurchasedDate: Number
+		lastPurchasedDate: Number,
+		count: Number
 	},
 	toys: {
 		avgTime: Number,
-		lastPurchasedDate: Number
+		lastPurchasedDate: Number,
+		count: Number
 	},
 	electronics: {
 		avgTime: Number,
-		lastPurchasedDate: Number
+		lastPurchasedDate: Number,
+		count: Number
 	},
 	payments: {
 		avgTime: Number,
-		lastPurchasedDate: Number
+		lastPurchasedDate: Number,
+		count: Number
 	},
 	music: {
 		avgTime: Number,
-		lastPurchasedDate: Number
+		lastPurchasedDate: Number,
+		count: Number
 	},
 	travel: {
 		avgTime: Number,
-		lastPurchasedDate: Number
+		lastPurchasedDate: Number,
+		count: Number
 	},
 
 })

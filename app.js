@@ -106,27 +106,33 @@ passport.use(new SliceStrategy({
                     mostExpPrice: null,
                     books: {
                       avgTime: null,
-                      lastPurchasedDate: null
+                      lastPurchasedDate: null,
+                      count: 0
                     },
                     toys: {
                       avgTime: null,
-                      lastPurchasedDate: null
+                      lastPurchasedDate: null,
+                      count: 0
                     },
                     electronics: {
                       avgTime: null,
-                      lastPurchasedDate: null
+                      lastPurchasedDate: null,
+                      count: 0
                     },
                     payments: {
                       avgTime: null,
-                      lastPurchasedDate: null
+                      lastPurchasedDate: null,
+                      count: 0
                     },
                     music: {
                       avgTime: null,
-                      lastPurchasedDate: null
+                      lastPurchasedDate: null,
+                      count: 0
                     },
                     travel: {
                       avgTime: null,
-                      lastPurchasedDate: null
+                      lastPurchasedDate: null,
+                      count: 0
                     },
                   }, function(err, obj){
                     myUserId = obj._id;
@@ -158,12 +164,18 @@ app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
 
-app.get('/orders', function(req, res) {
+app.get('/history', function(req, res) {
   Item.find({}, function(err, items) {
     res.json(items);
   })
   // var j = JSON.parse('{"currentTime":1443945578000,"result":[{"updateTime":1443900446000,"orderNumber":"WWRG-714577","orderTitle":"","orderDate":"2015-09-30","orderTax":0,"shippingCost":800,"orderTotal":2950,"purchaseType":{"name":"Shippable Purchase","href":"https://api.slice.com/api/v1/purchasetypes/2"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/104913"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/8825320504685508561"}],"shipments":[],"orderEmails":[{"href":"https://api.slice.com/api/v1/emails/-2744358439782971816"}],"shipmentEmails":[],"attributes":[],"href":"https://api.slice.com/api/v1/orders/-5423354854282239345"},{"updateTime":1443900459000,"orderNumber":"20-47486/NCA","orderTitle":"","orderDate":"2015-07-18","orderTax":0,"shippingCost":0,"orderTotal":0,"purchaseType":{"name":"Shippable Purchase","href":"https://api.slice.com/api/v1/purchasetypes/2"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/13"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/-1286170951846858922"}],"shipments":[{"href":"https://api.slice.com/api/v1/shipments/2917934367052764465"}],"orderEmails":[{"href":"https://api.slice.com/api/v1/emails/-549732122993425930"}],"shipmentEmails":[{"href":"https://api.slice.com/api/v1/emails/-3115291614562854745"}],"attributes":[],"href":"https://api.slice.com/api/v1/orders/6214947023161511848"},{"updateTime":1443900454000,"orderNumber":"111-8979626-3093814","orderTitle":"","orderDate":"2014-10-31","orderTax":0,"shippingCost":0,"orderTotal":0,"purchaseType":{"name":"Shippable Purchase","href":"https://api.slice.com/api/v1/purchasetypes/2"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/1"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/807488140574327793"},{"href":"https://api.slice.com/api/v1/items/-1611323039806152719"}],"shipments":[{"href":"https://api.slice.com/api/v1/shipments/8468805107214919429"}],"orderEmails":[],"shipmentEmails":[{"href":"https://api.slice.com/api/v1/emails/5947302459353644415"}],"attributes":[],"href":"https://api.slice.com/api/v1/orders/971490600264586275"},{"updateTime":1443900461000,"orderNumber":"1664-2811-8719-2159","orderTitle":"","orderDate":"2013-03-20","orderTax":0,"shippingCost":0,"orderTotal":100,"purchaseType":{"name":"Payment","href":"https://api.slice.com/api/v1/purchasetypes/3"},"merchant":{"hidden":false,"href":"https://api.slice.com/api/v1/merchants/58"},"mailbox":{"href":"https://api.slice.com/api/v1/mailboxes/-5035517678949188930"},"items":[{"href":"https://api.slice.com/api/v1/items/-164636839841946475"}],"shipments":[],"orderEmails":[{"href":"https://api.slice.com/api/v1/emails/7166300581912913232"}],"shipmentEmails":[],"attributes":[],"href":"https://api.slice.com/api/v1/orders/7380408207138564003"}]}');
   // res.json(j)
+})
+
+app.get('/orders', function(req, res) {
+  Notification.find({}, function (err, data) {
+    res.json(data);
+  })
 })
 
 app.get('/slice', function(req, res) {
@@ -210,7 +222,7 @@ app.get('/refresh', function(req, res) {
     curr = moment().format('1995-11-11', 'YYYY-MM-DD');
   }
   var temp = orders.result;
-  var userDefaults;
+  //var userDefaults;
 
   // User.find({}, function(err, data){
   //   if (data) {
@@ -261,61 +273,118 @@ app.get('/refresh', function(req, res) {
                     time : order.orderDate
                   }, function(err, item) {
 
+                    User.find({}, function(err, obj){
 
-                  });
+                        //ALGORITHM - FIND MOST EXPENSIVE
+                        var mostExpName = obj[0].mostExpName;
+                        var mostExpPrice = obj[0].mostExpPrice;
 
-                  User.find({}, function(err, obj){
+                        if (mostExpName == null) {
+                          User.update({}, {
+                            mostExpName: name,
+                            mostExpPrice: order.orderTotal
+                          }, function(err, obj){
+                          })
+                        }
 
-                      //ALGORITHM - FIND MOST EXPENSIVE
-                      var mostExpName = obj[0].mostExpName;
-                      var mostExpPrice = obj[0].mostExpPrice;
+                        else if (mostExpPrice && mostExpPrice < order.orderTotal) {
+                          var diff = order.orderTotal - mostExpPrice;
+                          message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + diff; 
+                          //push message to notifications collection
 
-                      if (mostExpName == null) {
-                        User.update({}, {
-                          mostExpName: name,
-                          mostExpPrice: order.orderTotal
-                        }, function(err, obj){
-                        })
-                      }
+                          User.update({}, {
+                            mostExpName: name,
+                            mostExpPrice: order.orderTotal
+                          }, function(err, obj){
 
-                      if (mostExpPrice && mostExpPrice < order.orderTotal) {
-                        var diff = order.orderTotal - mostExpPrice;
-                        message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + diff; 
-                        //push message to notifications collection
+                          })
+                        }
+                        //----------------------------------
 
-                        User.update({}, {
-                          mostExpName: name,
-                          mostExpPrice: order.orderTotal
-                        }, function(err, obj){
+                        //ALGORITHM - KEYWORDS
 
-                        })
+                        var words = name.split(" ");
+                        console.log(words);
 
-                      }
+                        for(var i = 0; i < words.length; i++ ){
+                          if (words[i] === "sex") {
+                            message = "You pervert!"
+                          }
 
-                      // var db = [];
-
-                      // if (db.length == 2) {
-                      //   avgTime = db[1].bought - lastPurchasedDate;
-                      // }
-                      
-                      // else if (db.length > 2 && db.length <= 5) {
-                      //   avgTime = (avgTime*(db.length-1) + obj.bought - lastPurchasedDate)/(db.length);
-                      // }
-
-                      // else if (db.length > 5) {
-                      //   if (obj.bought - lastPurchasedDate > avgTime * 3) {
-                      //     alert("it's been a while since you've gotten " + obj.name)
-                      //   }
+                          if (words[i] === "Structures") {
+                            message = "You nerd!"
+                          }
+                        }
                         
-                      //   avgTime = (avgTime*(db.length-1) + obj.bought - lastPurchasedDate)/(db.length);
-                      // }
-                      
-                      // lastPurchasedDate = obj.bought
+                        console.log(message);
 
+                        //ALGORITHM - INCONSISTENCY IN BUYING
 
+                        // var data = obj[category];
+                        // var count = data.count;
 
+                        // //date of current object
+                        // var year = Number(order.orderDate.substring(0, 4));
+                        // var month = Number(order.orderDate.substring(5, 7));
+                        // var day = Number(order.orderDate.slice(-2));
 
+                        // //difference between current and last purchased day
+                        // var a = moment([year, month, day]);
+                        // var b = moment([lastPurchasedDate[category].year, lastPurchasedDate[category].month, lastPurchasedDate[category].day]);
+                        // var diffInDays = a.diff(b, 'days');
 
+                        // if (count == 2) {
+                        //   data.avgTime = diffInDays;
+                        // }
+                        
+                        // else if (count > 2 && count <= 5) {
+                        //   data.avgTime = (data.avgTime * (count - 1) + diffInDays)/count;
+                        // }
+
+                        // else if (count > 5) {
+                        //   if (diffInDays > data.avgTime * 3) {
+                        //     message = "it's been a while since you've gotten " + category;
+                        //     //push message to notifications collection
+
+                        //   }
+                          
+                        //   data.avgTime = (data.avgTime * (count - 1) + diffInDays)/count;
+                        // }
+                        
+                        // //get counts
+                        // Item.find({
+                        //   category: "Books"
+                        // }, function(err, body){
+                        //   bookcount = body.length 
+                        // })
+
+                        // Item.find({
+                        //   category: "Electronics & Accessories"
+                        // }, function(err, body){
+                        //   elecount = body.length 
+                        // })
+
+                        // Item.find({
+                        //   category: "Music"
+                        // }, function(err, body){
+                        //   musiccount = body.length 
+                        // })
+
+                        // User.update({
+                        //   books: { count: bookcount },
+                        //   electronics: { count: elecount },
+                        //   music: { count: musiccount }
+                        // }, function(err, d){
+
+                        // })
+
+                        // lastPurchasedDate[category] = {
+                        //   "year": year
+                        //   "month": month
+                        //   "day": day
+                        // }
+
+                    })
 
                   })
                                     
@@ -329,7 +398,11 @@ app.get('/refresh', function(req, res) {
     process.env['LAST_UPDATE'] = max;
   })
 
-  res.redirect('/orders');
+// <<<<<<< HEAD
+  // res.redirect('/orders');
+// =======
+  res.redirect('/history');
+
 });
 
 
