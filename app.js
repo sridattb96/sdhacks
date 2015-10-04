@@ -103,9 +103,32 @@ passport.use(new SliceStrategy({
                 if (!err && count === 0) {
                   User.create({
                     mostExpName: null,
-                    mostExpPrice: null
+                    mostExpPrice: null,
+                    books: {
+                      avgTime: null,
+                      lastPurchasedDate: null
+                    },
+                    toys: {
+                      avgTime: null,
+                      lastPurchasedDate: null
+                    },
+                    electronics: {
+                      avgTime: null,
+                      lastPurchasedDate: null
+                    },
+                    payments: {
+                      avgTime: null,
+                      lastPurchasedDate: null
+                    },
+                    music: {
+                      avgTime: null,
+                      lastPurchasedDate: null
+                    },
+                    travel: {
+                      avgTime: null,
+                      lastPurchasedDate: null
+                    },
                   }, function(err, obj){
-                    //console.log(obj);
                     myUserId = obj._id;
                   })
                 }
@@ -241,9 +264,9 @@ app.get('/refresh', function(req, res) {
 
                   });
 
-                  //ALGORITHM - FIND MOST EXPENSIVE
                   User.find({}, function(err, obj){
 
+                      //ALGORITHM - FIND MOST EXPENSIVE
                       var mostExpName = obj[0].mostExpName;
                       var mostExpPrice = obj[0].mostExpPrice;
 
@@ -255,13 +278,10 @@ app.get('/refresh', function(req, res) {
                         })
                       }
 
-                      console.log("compare: ");
-                      console.log(mostExpPrice);
-                      console.log(order.orderTotal);
-
                       if (mostExpPrice && mostExpPrice < order.orderTotal) {
                         var diff = order.orderTotal - mostExpPrice;
                         message = name + " is the most expensive thing you've bought, beating out " + mostExpName + " by $" + diff; 
+                        //push message to notifications collection
 
                         User.update({}, {
                           mostExpName: name,
@@ -271,8 +291,33 @@ app.get('/refresh', function(req, res) {
                         })
 
                       }
-                  })
 
+                      // var db = [];
+
+                      // if (db.length == 2) {
+                      //   avgTime = db[1].bought - lastPurchasedDate;
+                      // }
+                      
+                      // else if (db.length > 2 && db.length <= 5) {
+                      //   avgTime = (avgTime*(db.length-1) + obj.bought - lastPurchasedDate)/(db.length);
+                      // }
+
+                      // else if (db.length > 5) {
+                      //   if (obj.bought - lastPurchasedDate > avgTime * 3) {
+                      //     alert("it's been a while since you've gotten " + obj.name)
+                      //   }
+                        
+                      //   avgTime = (avgTime*(db.length-1) + obj.bought - lastPurchasedDate)/(db.length);
+                      // }
+                      
+                      // lastPurchasedDate = obj.bought
+
+
+
+
+
+
+                  })
                                     
                 }
             });
@@ -283,7 +328,7 @@ app.get('/refresh', function(req, res) {
   Item.findOne({}).sort('-time').exec(function(err, max) {
     process.env['LAST_UPDATE'] = max;
   })
-  
+
   res.redirect('/orders');
 });
 
