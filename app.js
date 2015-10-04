@@ -373,7 +373,7 @@ app.get('/refresh', function(req, res) {
                           var d = new Date();
 
                           Notification.create({
-                            message: "There are the most " + cat + "out of all the categories",,
+                            message: "There are the most " + cat + "out of all the categories",
                             time: d
                           })
                         }
