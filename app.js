@@ -22,21 +22,21 @@ require('./models/notification');
 var Item = mongoose.model('Item'),
     Notification = mongoose.model('Notification');
 
-function makeRequest(url, result) {
-  request({
-      url: url, 
-      method: 'GET', 
-      headers: { //We can define headers too
-          'Authorization' : auth
-      }
-  }, function(error, response, body){
-      if(error) {
-          console.log(error);
-      } else {
-          result = body; 
-      }
-  });
-}
+// function makeRequest(url, result) {
+//   request({
+//       url: url, 
+//       method: 'GET', 
+//       headers: { //We can define headers too
+//           'Authorization' : auth
+//       }
+//   }, function(error, response, body){
+//       if(error) {
+//           console.log(error);
+//       } else {
+//           result = body; 
+//       }
+//   });
+// }
 
 
 
@@ -171,9 +171,57 @@ app.get('/refresh', function(req, res) {
   temp.forEach(function(order) {
 
     if (moment().format(order.orderDate, 'YYYY-MM-DD') > curr) {
+      
+      var merchant;
+      var name;
+      var category;
+
+      request({
+          url: order.merchant.href, 
+          method: 'GET', 
+          headers: { 
+              'Authorization' : auth
+          }
+      }, function(error, response, body){
+          if(error) {
+              console.log(error);
+          } else {
+
+            merchant = JSON.parse(body).result.name; 
+            request({
+                url: order.items[0].href, 
+                method: 'GET', 
+                headers: { 
+                    'Authorization' : auth
+                }
+            }, function(error, response, item){
+                if(error) {
+                    console.log(error);
+                } else {
+                  var j = JSON.parse(item);
+                  name = j.result.description;
+
+                  category = j.result.category.name;
+                  Item.create({
+                    name : name, 
+                    merchant : merchant,
+                    category : category,
+                    price : order.orderTotal,
+                    time : new Date()
+                  }, function(err, item) {
+
+
+                  });
+
+                  
+                }
+            });
+          }
+      });
+      
       // var merchant; 
       // var item;
-      // makeRequest(order.merchant.href, merchant)
+      // makeRequest(order.merchant.href, merchant)fvc
       // makeRequest(order.items[0].href, item);
 
       // console.log(merchant);
@@ -182,17 +230,17 @@ app.get('/refresh', function(req, res) {
 
       // var d = new Date(order.orderDate);
 
-      Item.create({
-        name : "blah", 
-        merchant : "blah",
-        category : "blah",
-        price : 123,
-        time : new Date()
-      }, function(err, item) {
-        console.log('yes');
+      // Item.create({
+      //   name : "blah", 
+      //   merchant : "blah",
+      //   category : "blah",
+      //   price : 123,
+      //   time : new Date()
+      // }, function(err, item) {
+      //   console.log('yes');
 
 
-      });
+      // });
     }
 
       
