@@ -369,7 +369,7 @@ app.get('/refresh', function(req, res) {
                         //   time: d
                         // })
 
-                        if (ind == order.length ) {
+                        if (ind == order.length - 1 ) {
                           var d = new Date();
 
                           Notification.create({
@@ -397,7 +397,7 @@ app.get('/refresh', function(req, res) {
 
                         }
 
-                        if (ind == order.length ) {
+                        if (ind == order.length - 1 ) {
                           var d = new Date();
 
                           Notification.create({
