@@ -13,8 +13,10 @@ var express = require('express')
 var url = 'mongodb://localhost/sdhacks';
 var db = mongoose.createConnection(url);
 var orders; 
+var auth;
 
-require('./models/user');
+require('./models/item');
+require('./models/notification');
 
 var SLICE_CLIENT_ID = "8ee96e75"
 var SLICE_CLIENT_SECRET = "5382c68434f72e0a62702e1df2a093f5";
@@ -62,7 +64,7 @@ passport.use(new SliceStrategy({
     callbackURL: "http://localhost:3000/auth/slice/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    var auth = "Bearer " + accessToken; 
+    auth = "Bearer " + accessToken; 
     process.nextTick(function () {
       request({
           url: 'https://api.slice.com/api/v1/orders', //URL to hit
@@ -125,7 +127,7 @@ app.get('/auth/slice',
 //   login page. Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
 app.get('/auth/slice/callback', 
-  passport.authenticate('slice', { failureRedirect: '/login' }),
+  passport.authenticate('slice', { failureRedirect: '/' }),
   function(req, res) {
     res.redirect('/account');
   });
