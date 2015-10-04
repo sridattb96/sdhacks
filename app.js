@@ -10,27 +10,11 @@ var express = require('express')
   , mongoose = require('mongoose')
   , request = require('request');
 
-request({
-    url: 'https://api.slice.com/api/v1/orders', //URL to hit
-    // qs: {from: 'blog example', time: +new Date()}, //Query string data
-    method: 'GET', //Specify the method
-    headers: { //We can define headers too
-        'Authorization' : 'Bearer ebbd15b87763c2e648e4eaf948f3ea32'
-    }
-}, function(error, response, body){
-    if(error) {
-        console.log(error);
-    } else {
-        console.log(response.statusCode, body);
-    }
-});
-
-
 var url = 'mongodb://localhost/sdhacks';
 var db = mongoose.createConnection(url);
+var orders; 
 
 require('./models/user');
-
 
 var SLICE_CLIENT_ID = "8ee96e75"
 var SLICE_CLIENT_SECRET = "5382c68434f72e0a62702e1df2a093f5";
@@ -78,9 +62,22 @@ passport.use(new SliceStrategy({
     callbackURL: "http://localhost:3000/auth/slice/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    console.log(accessToken);
-    // asynchronous verification, for effect...
+    var auth = "Bearer " + accessToken; 
     process.nextTick(function () {
+      request({
+          url: 'https://api.slice.com/api/v1/orders', //URL to hit
+          // qs: {from: 'blog example', time: +new Date()}, //Query string data
+          method: 'GET', //Specify the method
+          headers: { //We can define headers too
+              'Authorization' : auth
+          }
+      }, function(error, response, body){
+          if(error) {
+              console.log(error);
+          } else {
+              orders = body; 
+          }
+      });
       
       // To keep the example simple, the user's Slice profile is returned to
       // represent the logged-in user. In a typical application, you would want
@@ -103,6 +100,14 @@ app.get('/account', ensureAuthenticated, function(req, res){
 app.get('/login', function(req, res){
   res.render('login', { user: req.user });
 });
+
+app.get('/orders', function(req, res) {
+  if (!req.user) {
+    res.render('index');
+  }
+  var j = JSON.parse(orders);
+  res.json(j);
+})
 
 
 
