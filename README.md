@@ -15,7 +15,6 @@ Patterns in Purchasing
 
 Keywords
 - look for keywords in titles and play around
-- sex -> “You pervert! I C U”
 - uber -> “Damn you wanderlust”
 
 List of Categories:
